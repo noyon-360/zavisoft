@@ -6,6 +6,7 @@ import '../../../core/services/auth_storage_service.dart';
 import '../../users/controllers/user_controller.dart';
 import '../controllers/product_controller.dart';
 import '../widgets/product_card.dart';
+import '../../../core/widgets/custom_3d_drawer.dart';
 
 class ProductListScreen extends StatefulWidget {
   const ProductListScreen({super.key});
@@ -35,199 +36,267 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[50],
+    return Custom3DDrawer(
       drawer: _buildDrawer(context),
-      body: Obx(() {
-        if (_productController.isLoading &&
-            _productController.categories.isEmpty) {
-          return const Center(child: CircularProgressIndicator());
-        }
+      mainScreen: Scaffold(
+        backgroundColor: Colors.grey[50],
+        body: Obx(() {
+          if (_productController.isLoading &&
+              _productController.categories.isEmpty) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-        if (_productController.categories.isEmpty) {
-          return const Center(child: Text("No Categories Found"));
-        }
+          if (_productController.categories.isEmpty) {
+            return const Center(child: Text("No Categories Found"));
+          }
 
-        final categories = _productController.categories.toList();
+          final categories = _productController.categories.toList();
 
-        return DefaultTabController(
-          length: categories.length,
-          child: SafeArea(
-            bottom: false,
-            child: NestedScrollView(
-              headerSliverBuilder: (context, innerBoxIsScrolled) {
-                return [
-                  SliverPadding(
-                    padding: const EdgeInsets.all(16),
-                    sliver: SliverToBoxAdapter(
-                      child: Obx(() {
-                        final user = _userController.user;
-                        return Row(
-                          children: [
-                            GestureDetector(
-                              onTap: () => Scaffold.of(context).openDrawer(),
-                              child: CircleAvatar(
-                                radius: 20,
-                                backgroundColor: AppColors.primaryBlue
-                                    .withOpacity(0.1),
-                                child: Text(
-                                  user?.name.firstname[0].toUpperCase() ?? "U",
-                                  style: const TextStyle(
-                                    color: AppColors.primaryBlue,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+          return DefaultTabController(
+            length: categories.length,
+            child: SafeArea(
+              bottom: false,
+              child: Builder(
+                builder: (context) {
+                  return NestedScrollView(
+                    headerSliverBuilder: (context, innerBoxIsScrolled) {
+                      return [
+                        SliverPadding(
+                          padding: const EdgeInsets.all(16),
+                          sliver: SliverToBoxAdapter(
+                            child: Obx(() {
+                              final user = _userController.user;
+                              return Row(
                                 children: [
-                                  Text(
-                                    "Hello, ${user?.name.firstname.capitalizeFirst ?? 'User'}",
-                                    style: const TextStyle(
-                                      color: AppColors.primaryBlue,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 24,
+                                  GestureDetector(
+                                    onTap: () =>
+                                        Custom3DDrawer.of(context)?.toggle(),
+                                    child: CircleAvatar(
+                                      radius: 20,
+                                      backgroundColor: AppColors.primaryBlue
+                                          .withOpacity(0.1),
+                                      child: Text(
+                                        user?.name.firstname[0].toUpperCase() ??
+                                            "U",
+                                        style: const TextStyle(
+                                          color: AppColors.primaryBlue,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                  const Text(
-                                    "Welcome back!",
-                                    style: TextStyle(
-                                      color: Colors.grey,
-                                      fontSize: 14,
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          "Hello, ${user?.name.firstname.capitalizeFirst ?? 'User'}",
+                                          style: const TextStyle(
+                                            color: AppColors.primaryBlue,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 24,
+                                          ),
+                                        ),
+                                        const Text(
+                                          "Welcome back!",
+                                          style: TextStyle(
+                                            color: Colors.grey,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }),
+                          ),
+                        ),
+                        SliverOverlapAbsorber(
+                          handle:
+                              NestedScrollView.sliverOverlapAbsorberHandleFor(
+                                context,
+                              ),
+                          sliver: SliverPersistentHeader(
+                            pinned: true,
+                            delegate: _PersistentHeaderDelegate(
+                              height: 118,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    height: 70,
+                                    color: Colors
+                                        .grey[50], // Match screen background
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 8,
+                                    ),
+                                    child: TextField(
+                                      controller: _searchController,
+                                      decoration: InputDecoration(
+                                        hintText: "Search Products",
+                                        prefixIcon: const Icon(
+                                          Icons.search,
+                                          color: Colors.grey,
+                                        ),
+                                        filled: true,
+                                        fillColor: Colors.white,
+                                        contentPadding:
+                                            const EdgeInsets.symmetric(
+                                              vertical: 0,
+                                            ),
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                          borderSide: BorderSide.none,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    height: 48,
+                                    color: Colors.white,
+                                    child: TabBar(
+                                      labelColor: AppColors.primaryBlue,
+                                      unselectedLabelColor: Colors.grey,
+                                      indicatorColor: AppColors.primaryBlue,
+                                      isScrollable: true,
+                                      tabs: categories
+                                          .map(
+                                            (cat) =>
+                                                Tab(text: cat.toUpperCase()),
+                                          )
+                                          .toList(),
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                          ],
-                        );
-                      }),
-                    ),
-                  ),
-                  SliverOverlapAbsorber(
-                    handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
-                      context,
-                    ),
-                    sliver: SliverPersistentHeader(
-                      pinned: true,
-                      delegate: _PersistentHeaderDelegate(
-                        height: 118,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              height: 70,
-                              color: Colors.grey[50], // Match screen background
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                              child: TextField(
-                                controller: _searchController,
-                                decoration: InputDecoration(
-                                  hintText: "Search Products",
-                                  prefixIcon: const Icon(
-                                    Icons.search,
-                                    color: Colors.grey,
-                                  ),
-                                  filled: true,
-                                  fillColor: Colors.white,
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    vertical: 0,
-                                  ),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Container(
-                              height: 48,
-                              color: Colors.white,
-                              child: TabBar(
-                                labelColor: AppColors.primaryBlue,
-                                unselectedLabelColor: Colors.grey,
-                                indicatorColor: AppColors.primaryBlue,
-                                isScrollable: true,
-                                tabs: categories
-                                    .map((cat) => Tab(text: cat.toUpperCase()))
-                                    .toList(),
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
+                      ];
+                    },
+                    body: TabBarView(
+                      children: categories.map((category) {
+                        return ProductTab(category: category);
+                      }).toList(),
                     ),
-                  ),
-                ];
-              },
-              body: TabBarView(
-                children: categories.map((category) {
-                  return ProductTab(category: category);
-                }).toList(),
+                  );
+                },
               ),
             ),
-          ),
-        );
-      }),
+          );
+        }),
+      ),
     );
   }
 
   Widget _buildDrawer(BuildContext context) {
     final authStorage = AuthStorageService();
-    return Drawer(
-      child: Column(
-        children: [
-          Obx(() {
-            final user = _userController.user;
-            return UserAccountsDrawerHeader(
-              decoration: const BoxDecoration(color: AppColors.primaryBlue),
-              currentAccountPicture: CircleAvatar(
-                backgroundColor: Colors.white,
-                child: Text(
-                  user?.name.firstname[0].toUpperCase() ?? "U",
-                  style: const TextStyle(
-                    color: AppColors.primaryBlue,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+    return Material(
+      color: AppColors.primaryBlue,
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Obx(() {
+                final user = _userController.user;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CircleAvatar(
+                      radius: 40,
+                      backgroundColor: Colors.white,
+                      child: Text(
+                        user?.name.firstname[0].toUpperCase() ?? "U",
+                        style: const TextStyle(
+                          color: AppColors.primaryBlue,
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      "${user?.name.firstname.capitalizeFirst ?? ''} ${user?.name.lastname.capitalizeFirst ?? ''}",
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      user?.email ?? 'user@example.com',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.8),
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                );
+              }),
+              const SizedBox(height: 40),
+              _drawerItem(
+                icon: Icons.person_outline,
+                title: "Profile",
+                onTap: () {},
               ),
-              accountName: Text(
-                "${user?.name.firstname.capitalizeFirst ?? ''} ${user?.name.lastname.capitalizeFirst ?? ''}",
-                style: const TextStyle(fontWeight: FontWeight.bold),
+              _drawerItem(
+                icon: Icons.shopping_bag_outlined,
+                title: "My Orders",
+                onTap: () {},
               ),
-              accountEmail: Text(user?.email ?? 'user@example.com'),
-            );
-          }),
-          // const ListTile(
-          //   leading: Icon(Icons.person_outline),
-          //   title: Text("Profile"),
-          // ),
-          // const ListTile(
-          //   leading: Icon(Icons.settings_outlined),
-          //   title: Text("Settings"),
-          // ),
-          const Spacer(),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text(
-              "Logout",
-              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-            ),
-            onTap: () async {
-              await authStorage.clearAuthData();
-              Get.offAll(() => const LoginScreen());
-            },
+              _drawerItem(
+                icon: Icons.favorite_border,
+                title: "Wishlist",
+                onTap: () {},
+              ),
+              _drawerItem(
+                icon: Icons.settings_outlined,
+                title: "Settings",
+                onTap: () {},
+              ),
+              const Spacer(),
+              _drawerItem(
+                icon: Icons.logout,
+                title: "Logout",
+                color: Colors.white,
+                onTap: () async {
+                  await authStorage.clearAuthData();
+                  Get.offAll(() => const LoginScreen());
+                },
+              ),
+            ],
           ),
-          const SizedBox(height: 20),
-        ],
+        ),
       ),
+    );
+  }
+
+  Widget _drawerItem({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+    Color color = Colors.white,
+  }) {
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(icon, color: color),
+      title: Text(
+        title,
+        style: TextStyle(
+          color: color,
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      onTap: onTap,
     );
   }
 }
