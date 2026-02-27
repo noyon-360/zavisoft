@@ -1,0 +1,1 @@
+flutter pub add get dio cached_network_image connectivity_plus equatable dartz hive_flutter hive flutter_secure_storage image_picker file_picker flutter_svg flutx_core
