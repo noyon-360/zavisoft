@@ -42,13 +42,16 @@ class ProductController extends GetxController {
   }
 
   Future<void> refreshAll() async {
+    print("Refresh started..."); // Debug
     _isLoading.value = true;
     await getCategories();
     if (_categories.isNotEmpty) {
+      // Load all categories
       final futures = _categories.map((cat) => getProductsByCategory(cat));
       await Future.wait(futures);
     }
     _isLoading.value = false;
+    print("Refresh complete!"); // Debug
   }
 
   Future<void> getCategories() async {

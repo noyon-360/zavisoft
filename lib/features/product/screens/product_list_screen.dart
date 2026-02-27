@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutx_core/flutx_core.dart';
 import 'package:get/get.dart';
 import 'package:zavisoft_task/core/constants/app_colors.dart';
-import 'package:zavisoft_task/core/extensions/input_decoration_extensions.dart';
+// import 'package:zavisoft_task/core/extensions/input_decoration_extensions.dart';
 
-import '../../../core/config/app_theme.dart';
 import '../../users/controllers/user_controller.dart';
 import '../controllers/product_controller.dart';
 import '../widgets/product_card.dart';
@@ -38,6 +36,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[50],
       body: Obx(() {
         if (_productController.isLoading &&
             _productController.categories.isEmpty) {
@@ -48,93 +47,103 @@ class _ProductListScreenState extends State<ProductListScreen> {
           return const Center(child: Text("No Categories Found"));
         }
 
+        final categories = _productController.categories.toList();
+
         return DefaultTabController(
-          length: _productController.categories.length,
-          child: RefreshIndicator(
-            onRefresh: _productController.refreshAll,
+          length: categories.length,
+          child: SafeArea(
+            bottom: false,
             child: NestedScrollView(
               headerSliverBuilder: (context, innerBoxIsScrolled) {
                 return [
+                  SliverPadding(
+                    padding: const EdgeInsets.all(16),
+                    sliver: SliverToBoxAdapter(
+                      child: Obx(() {
+                        final user = _userController.user;
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Hello, ${user?.name.firstname.capitalizeFirst ?? 'User'}",
+                              style: const TextStyle(
+                                color: AppColors.primaryBlue,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 24,
+                              ),
+                            ),
+                            const Text(
+                              "Welcome back!",
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        );
+                      }),
+                    ),
+                  ),
                   SliverOverlapAbsorber(
                     handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
                       context,
                     ),
-                    sliver: SliverMainAxisGroup(
-                      slivers: [
-                        SliverAppBar(
-                          expandedHeight: 200,
-                          floating: false,
-                          pinned: true,
-                          flexibleSpace: FlexibleSpaceBar(
-                            title: Text(
-                              "Products",
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                            background: Stack(
-                              fit: StackFit.expand,
-                              children: [
-                                Image.network(
-                                  "https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=2070&auto=format&fit=crop",
-                                  fit: BoxFit.cover,
-                                ),
-                                Container(
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                      colors: [
-                                        Colors.transparent,
-                                        Colors.black.withOpacity(0.7),
-                                      ],
-                                    ),
+                    sliver: SliverPersistentHeader(
+                      pinned: true,
+                      delegate: _PersistentHeaderDelegate(
+                        height: 118,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              height: 70,
+                              color: Colors.grey[50], // Match screen background
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
+                              child: TextField(
+                                controller: _searchController,
+                                decoration: InputDecoration(
+                                  hintText: "Search Products",
+                                  prefixIcon: const Icon(
+                                    Icons.search,
+                                    color: Colors.grey,
+                                  ),
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    vertical: 0,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: BorderSide.none,
                                   ),
                                 ),
-                              ],
+                              ),
                             ),
-                          ),
-                        ),
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: TextField(
-                              controller: _searchController,
-                              decoration: context.primaryInputDecoration
-                                  .copyWith(
-                                    hintText: "Search products...",
-                                    prefixIcon: const Icon(Icons.search),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    filled: true,
-                                    fillColor: Colors.grey[100],
-                                  ),
+                            Container(
+                              height: 48,
+                              color: Colors.white,
+                              child: TabBar(
+                                labelColor: AppColors.primaryBlue,
+                                unselectedLabelColor: Colors.grey,
+                                indicatorColor: AppColors.primaryBlue,
+                                isScrollable: true,
+                                tabs: categories
+                                    .map((cat) => Tab(text: cat.toUpperCase()))
+                                    .toList(),
+                              ),
                             ),
-                          ),
+                          ],
                         ),
-                        SliverPersistentHeader(
-                          pinned: true,
-                          delegate: _SliverAppBarDelegate(
-                            TabBar(
-                              // theme
-                              dividerColor: AppColors.primaryGrayDark,
-                              unselectedLabelColor: AppColors.primaryGrayDark,
-                              labelColor: AppColors.primaryBlue,
-                              indicatorColor: AppColors.primaryBlue,
-                              indicatorWeight: 2,
-                              isScrollable: true,
-                              tabs: _productController.categories
-                                  .map((cat) => Tab(text: cat.toUpperCase()))
-                                  .toList(),
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ];
               },
               body: TabBarView(
-                children: _productController.categories.map((category) {
+                children: categories.map((category) {
                   return ProductTab(category: category);
                 }).toList(),
               ),
@@ -175,32 +184,53 @@ class _ProductTabState extends State<ProductTab>
         return const Center(child: Text("No products found"));
       }
 
-      return CustomScrollView(
-        key: PageStorageKey<String>(widget.category),
-        slivers: [
-          SliverOverlapInjector(
-            handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+      return SafeArea(
+        top: false,
+        bottom: false,
+        child: RefreshIndicator(
+          onRefresh: _productController.refreshAll,
+          edgeOffset: 118, // Pinned header height (70+48)
+          displacement: 40,
+          child: Builder(
+            builder: (context) {
+              return CustomScrollView(
+                key: PageStorageKey<String>(widget.category),
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  // Inject the overlap margin
+                  SliverOverlapInjector(
+                    handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
+                      context,
+                    ),
+                  ),
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        return ProductCard(product: products[index]);
+                      }, childCount: products.length),
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate((context, index) {
-              return ProductCard(product: products[index]);
-            }, childCount: products.length),
-          ),
-        ],
+        ),
       );
     });
   }
 }
 
-class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
-  _SliverAppBarDelegate(this._tabBar);
+class _PersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
+  final double height;
+  final Widget child;
 
-  final TabBar _tabBar;
+  _PersistentHeaderDelegate({required this.height, required this.child});
 
   @override
-  double get minExtent => _tabBar.preferredSize.height;
+  double get minExtent => height;
   @override
-  double get maxExtent => _tabBar.preferredSize.height;
+  double get maxExtent => height;
 
   @override
   Widget build(
@@ -208,11 +238,11 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     double shrinkOffset,
     bool overlapsContent,
   ) {
-    return Container(color: AppColors.primaryWhite, child: _tabBar);
+    return SizedBox.expand(child: child);
   }
 
   @override
-  bool shouldRebuild(_SliverAppBarDelegate oldDelegate) {
-    return false;
+  bool shouldRebuild(covariant _PersistentHeaderDelegate oldDelegate) {
+    return oldDelegate.height != height || oldDelegate.child != child;
   }
 }
