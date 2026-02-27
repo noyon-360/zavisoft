@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:zavisoft_task/core/constants/app_colors.dart';
-// import 'package:zavisoft_task/core/extensions/input_decoration_extensions.dart';
-
+import '../../auth/screens/login_screen.dart';
+import '../../../core/services/auth_storage_service.dart';
 import '../../users/controllers/user_controller.dart';
 import '../controllers/product_controller.dart';
 import '../widgets/product_card.dart';
@@ -37,6 +37,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
+      drawer: _buildDrawer(context),
       body: Obx(() {
         if (_productController.isLoading &&
             _productController.categories.isEmpty) {
@@ -61,22 +62,44 @@ class _ProductListScreenState extends State<ProductListScreen> {
                     sliver: SliverToBoxAdapter(
                       child: Obx(() {
                         final user = _userController.user;
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        return Row(
                           children: [
-                            Text(
-                              "Hello, ${user?.name.firstname.capitalizeFirst ?? 'User'}",
-                              style: const TextStyle(
-                                color: AppColors.primaryBlue,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 24,
+                            GestureDetector(
+                              onTap: () => Scaffold.of(context).openDrawer(),
+                              child: CircleAvatar(
+                                radius: 20,
+                                backgroundColor: AppColors.primaryBlue
+                                    .withOpacity(0.1),
+                                child: Text(
+                                  user?.name.firstname[0].toUpperCase() ?? "U",
+                                  style: const TextStyle(
+                                    color: AppColors.primaryBlue,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ),
                             ),
-                            const Text(
-                              "Welcome back!",
-                              style: TextStyle(
-                                color: Colors.grey,
-                                fontSize: 14,
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Hello, ${user?.name.firstname.capitalizeFirst ?? 'User'}",
+                                    style: const TextStyle(
+                                      color: AppColors.primaryBlue,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 24,
+                                    ),
+                                  ),
+                                  const Text(
+                                    "Welcome back!",
+                                    style: TextStyle(
+                                      color: Colors.grey,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
@@ -151,6 +174,60 @@ class _ProductListScreenState extends State<ProductListScreen> {
           ),
         );
       }),
+    );
+  }
+
+  Widget _buildDrawer(BuildContext context) {
+    final authStorage = AuthStorageService();
+    return Drawer(
+      child: Column(
+        children: [
+          Obx(() {
+            final user = _userController.user;
+            return UserAccountsDrawerHeader(
+              decoration: const BoxDecoration(color: AppColors.primaryBlue),
+              currentAccountPicture: CircleAvatar(
+                backgroundColor: Colors.white,
+                child: Text(
+                  user?.name.firstname[0].toUpperCase() ?? "U",
+                  style: const TextStyle(
+                    color: AppColors.primaryBlue,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              accountName: Text(
+                "${user?.name.firstname.capitalizeFirst ?? ''} ${user?.name.lastname.capitalizeFirst ?? ''}",
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              accountEmail: Text(user?.email ?? 'user@example.com'),
+            );
+          }),
+          const ListTile(
+            leading: Icon(Icons.person_outline),
+            title: Text("Profile"),
+          ),
+          const ListTile(
+            leading: Icon(Icons.settings_outlined),
+            title: Text("Settings"),
+          ),
+          const Spacer(),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.logout, color: Colors.red),
+            title: const Text(
+              "Logout",
+              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+            ),
+            onTap: () async {
+              await authStorage.clearAuthData();
+              Get.offAll(() => const LoginScreen());
+            },
+          ),
+          const SizedBox(height: 20),
+        ],
+      ),
     );
   }
 }
