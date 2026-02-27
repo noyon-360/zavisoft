@@ -204,14 +204,14 @@ class _ProductListScreenState extends State<ProductListScreen> {
               accountEmail: Text(user?.email ?? 'user@example.com'),
             );
           }),
-          const ListTile(
-            leading: Icon(Icons.person_outline),
-            title: Text("Profile"),
-          ),
-          const ListTile(
-            leading: Icon(Icons.settings_outlined),
-            title: Text("Settings"),
-          ),
+          // const ListTile(
+          //   leading: Icon(Icons.person_outline),
+          //   title: Text("Profile"),
+          // ),
+          // const ListTile(
+          //   leading: Icon(Icons.settings_outlined),
+          //   title: Text("Settings"),
+          // ),
           const Spacer(),
           const Divider(),
           ListTile(
