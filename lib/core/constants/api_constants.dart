@@ -1,9 +1,8 @@
 class ApiConstants {
   /// [Base Configuration]
-  static const String baseDomain = 'http://10.10.5.48:5006'; // Noyon Office
-  // static const String baseDomain = 'http://192.168.0.218:5000'; // Noyon Home
+  static const String baseDomain = 'https://fakestoreapi.com';
 
-  static const String baseUrl = '$baseDomain/api/v1';
+  static const String baseUrl = baseDomain;
 
   /// Dynamically generated WebSocket URL based on baseDomain
   static String get webSocketUrl {
@@ -42,17 +41,9 @@ class AuthEndpoints {
   static const String _base = '${ApiConstants.baseUrl}/auth';
 
   final String login = '$_base/login';
-  final String register = '$_base/register';
-
-  // final String forgetPassSendOtp = '$_base/forget';
-  // final String verifyOtp = '$_base/verify-otp';
-  // final String resetPass = '$_base/reset-password';
-
-  final String changePassword = '$_base/change-password';
 
   final String refreshToken = '$_base/refresh-token';
 
-  // final String logout = '$_base/logout';
 }
 
 class UserEndpoints {

@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart' hide FormData;
 
+import '../../features/auth/screens/login_screen.dart';
 import '../common/models/base_response.dart';
 import '../common/models/network_failure.dart';
 import '../common/models/network_success.dart';
@@ -153,7 +154,7 @@ class ApiClient {
 
       // Delay navigation slightly to ensure UI is ready
       await Future.delayed(Duration.zero);
-      // Get.offAll(() => LoginScreen(), transition: Transition.leftToRight);
+      Get.offAll(() => LoginScreen(), transition: Transition.leftToRight);
     } catch (e) {
       DPrint.error("Logout error: $e");
     }
@@ -235,42 +236,52 @@ class ApiClient {
         "☁️  BASE Response -> $method ||=> ${response.statusCode} ||=> Api: $endpoint \n Api: ${response.data}",
       );
 
-      final baseResponse = BaseResponse<T>.fromJson(response.data, fromJsonT);
+      // final baseResponse = BaseResponse<T>.fromJson(response.data, fromJsonT);
 
-      // final data = (baseResponse.data as T);
+      // final data = (response.data as T);
 
-      if (baseResponse.success) {
-        final message = baseResponse.message;
-        final statusCode = response.statusCode ?? 200;
-
-        final successResult = NetworkSuccess<T>(
-          data: baseResponse.data as T,
-          message: message,
-          statusCode: statusCode,
+      if (response.data != null) {
+        return Right(
+          NetworkSuccess<T>(
+            data: fromJsonT(response.data),
+            message: 'Success',
+            statusCode: 200,
+          ),
         );
-
-        // 4. Cache the fresh response if it's a cached GET request
-        if (cache) {
-          final rawResponseData = response.data as Map<String, dynamic>?;
-          final dataToCache = rawResponseData?['data'];
-
-          if (dataToCache != null) {
-            await _cacheService.cacheData(
-              endpoint,
-              data: dataToCache,
-              requestData: queryParameters,
-              cacheDuration: cacheDuration,
-            );
-            DPrint.info('Cached fresh response for $endpoint');
-          }
-        }
-
-        return Right(successResult);
       }
+
+      // if (baseResponse.success) {
+      //   final message = baseResponse.message;
+      //   final statusCode = response.statusCode ?? 200;
+
+      //   final successResult = NetworkSuccess<T>(
+      //     data: baseResponse.data as T,
+      //     message: message,
+      //     statusCode: statusCode,
+      //   );
+
+      //   // 4. Cache the fresh response if it's a cached GET request
+      //   if (cache) {
+      //     final rawResponseData = response.data as Map<String, dynamic>?;
+      //     final dataToCache = rawResponseData?['data'];
+
+      //     if (dataToCache != null) {
+      //       await _cacheService.cacheData(
+      //         endpoint,
+      //         data: dataToCache,
+      //         requestData: queryParameters,
+      //         cacheDuration: cacheDuration,
+      //       );
+      //       DPrint.info('Cached fresh response for $endpoint');
+      //     }
+      //   }
+
+      //   return Right(successResult);
+      // }
 
       return Left(
         ServerFailure(
-          message: baseResponse.combinedErrorMessage,
+          message: "Something went wrong",
           statusCode: response.statusCode ?? 400,
         ),
       );

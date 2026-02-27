@@ -1,5 +1,6 @@
 // import '/core/base/base_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutx_core/flutx_core.dart';
 import 'package:get/get.dart';
 
 import '../../constants/app_colors.dart';
@@ -49,12 +50,7 @@ class PrimaryButton extends StatelessWidget {
               try {
                 await onApiPressed!();
               } catch (e) {
-                Get.snackbar(
-                  "Error",
-                  e.toString(),
-                  backgroundColor: Colors.red[600],
-                  colorText: Colors.white,
-                );
+                DPrint.log("PrimaryButton Error: ${e.toString()}");
               } finally {
                 isLoading.value = false;
                 // Optional: auto cleanup after 10 sec
@@ -164,12 +160,7 @@ class SecondaryButton extends StatelessWidget {
               try {
                 await onApiPressed!();
               } catch (e) {
-                Get.snackbar(
-                  "Error",
-                  e.toString(),
-                  backgroundColor: Colors.red[600],
-                  colorText: Colors.white,
-                );
+                DPrint.log("SecondaryButton Error: ${e.toString()}");
               } finally {
                 isLoading.value = false;
                 // Optional: auto cleanup after 10 sec

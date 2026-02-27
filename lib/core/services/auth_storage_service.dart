@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../constants/key_constants.dart';
@@ -54,11 +53,9 @@ class AuthStorageService {
   // Check user authenticater or not
   Future<bool> isAuthenticated() async {
     final accessToken = await getAccessToken();
-    final roleString = await _secureStorage.read(key: KeyConst.role);
-    return accessToken != null &&
-        accessToken.isNotEmpty &&
-        roleString != null &&
-        roleString.isNotEmpty;
+
+    // final roleString = await _secureStorage.read(key: KeyConst.role);
+    return accessToken != null && accessToken.isNotEmpty;
   }
 
   // Get access token

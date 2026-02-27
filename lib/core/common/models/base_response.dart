@@ -1,5 +1,3 @@
-// lib/core/network/models/base_response.dart
-
 import 'error_source.dart';
 
 class BaseResponse<T> {
