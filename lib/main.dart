@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:zavisoft_task/core/config/app_theme.dart';
 import 'package:zavisoft_task/core/init/app_initializer.dart';
 
 import 'features/app/screens/app_decision_screen.dart';
@@ -18,7 +17,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       title: 'Flutter Demo',
-      theme: AppTheme.light,
+      theme: Theme.of(context),
       home: const AppDecisionScreen(),
     );
   }

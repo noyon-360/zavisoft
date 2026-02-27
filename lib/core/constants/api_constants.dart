@@ -34,6 +34,7 @@ class ApiConstants {
   /// [Endpoint Groups
   static AuthEndpoints get auth => AuthEndpoints();
   static UserEndpoints get user => UserEndpoints();
+  static ProductEndpoints get product => ProductEndpoints();
 }
 
 /// [Authentication Endpoints]
@@ -48,10 +49,13 @@ class AuthEndpoints {
 
 class UserEndpoints {
   static const String _base = '${ApiConstants.baseUrl}/users';
-  final String users = _base;
-
-  final String updatePersonalInfo = '$_base/update-profile';
-
-  final String profile = '$_base/profile';
-  final String deleteAccount = '$_base/delete-account';
+  final String user = '$_base/2';
 }
+
+class ProductEndpoints {
+  static const String _base = '${ApiConstants.baseUrl}/products';
+  final String products = _base;
+
+  final String categories = '$_base/categories';  
+}
+
